@@ -5,7 +5,7 @@ Database utils
 import psycopg2
 from psycopg2.pool import SimpleConnectionPool
 from fastapi import HTTPException
-from config import settings
+from app.core.config import settings
 
 db_pool = None
 
