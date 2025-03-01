@@ -33,6 +33,18 @@ class Book(BaseBook):
     id: int
 
 
+class BookUpdate(BaseModel):
+    """
+    Model for Book entity udpate requests
+    """
+    title: str | None = None
+    isbn: ISBN | None = None
+    genre: str | None = None
+    publication_date: date | None = None
+    available_copies: int | None = None
+    author_ids: list[int] | None = None
+
+
 # Response
 class BookAuthor(BaseModel):
     """
@@ -43,6 +55,7 @@ class BookAuthor(BaseModel):
     last_name: str
 
 
+# TODO :: refactor it to BookWithAuthors
 class BookResponse(Book):
     """
     Book response model

@@ -114,3 +114,36 @@ def add_new_book(db, book: books_models.BookCreate) -> int:
         execute_sql(db, link_sql, link_params)
 
     return new_book_id
+
+
+def update_book(db, book_id, update_data):
+    # Prepare to update book fields (excluding 'author_ids')
+    set_clauses = []
+    params = {}
+    for key, value in update_data.items():
+        if key != "author_ids":
+            set_clauses.append(f"{key} = %({key})s")
+            params[key] = value
+    params["book_id"] = book_id
+
+    if set_clauses:
+        sql_update = f"""
+        UPDATE books
+        SET {', '.join(set_clauses)}
+        WHERE id = %(book_id)s;
+        """
+        execute_sql(db, sql_update, params, returning=False)
+
+    # If author_ids is provided, update the book_authors associations
+    if "author_ids" in update_data:
+        new_author_ids = update_data["author_ids"]
+        # Delete existing associations
+        execute_sql(db, "DELETE FROM book_authors WHERE book_id = %(book_id)s;",
+                    {"book_id": book_id}, returning=False)
+        # Prepare bulk insertion parameters
+        bulk_sql = "INSERT INTO book_authors (book_id, author_id) VALUES %s;"
+        values = [(book_id, author_id) for author_id in new_author_ids]
+        execute_sql(db, bulk_sql, values, bulk=True, returning=False)
+
+    # TODO :: Decide upon an appropriate return value
+    return book_id

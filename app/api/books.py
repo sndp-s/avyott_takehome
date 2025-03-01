@@ -47,3 +47,16 @@ async def create_book(
     """
     added_book = books_service.add_new_book_service(db, book)
     return added_book
+
+
+@router.put("/{book_id}")
+async def update_book(
+    book_id: int,
+    book: books_models.BookUpdate,
+    db=Depends(get_db)
+) -> int:
+    """
+    Update an existing book.
+    """
+    book_id = books_service.update_book_service(db, book_id, book.dict(exclude_unset=True))
+    return book_id
