@@ -147,3 +147,19 @@ def update_book(db, book_id, update_data):
 
     # TODO :: Decide upon an appropriate return value
     return book_id
+
+
+def delete_book(db, book_id: int) -> int:
+    """
+    Delete a book and its associations from the database.
+    Returns the number of rows affected by the deletion of the book.
+    """
+    # Delete associations in the book_authors table
+    sql_delete_authors = "DELETE FROM book_authors WHERE book_id = %(book_id)s;"
+    execute_sql(db, sql_delete_authors, {"book_id": book_id}, returning=False)
+
+    # Delete the book from the books table
+    sql_delete_book = "DELETE FROM books WHERE id = %(book_id)s;"
+    rows_deleted = execute_sql(db, sql_delete_book, {"book_id": book_id}, returning=False)
+
+    return rows_deleted

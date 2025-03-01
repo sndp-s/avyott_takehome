@@ -60,3 +60,15 @@ async def update_book(
     """
     book_id = books_service.update_book_service(db, book_id, book.dict(exclude_unset=True))
     return book_id
+
+
+@router.delete("/{book_id}")
+async def delete_book(
+    book_id: Annotated[int, Path()],
+    db=Depends(get_db)
+) -> bool:
+    """
+    Deletes the book corresponsing to given book_id.
+    """
+    books_service.delete_book_service(db, book_id)
+    return True

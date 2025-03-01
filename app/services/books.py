@@ -39,3 +39,11 @@ def update_book_service(db, book_id: int, update_data: dict):
     """
     book_id = books_queries.update_book(db, book_id, update_data)
     return book_id
+
+
+def delete_book_service(db, book_id: int):
+    """
+    Delete book and its association with author/s corresponding to given book_id.
+    """
+    books_queries.delete_book(db, book_id)
+    return True
