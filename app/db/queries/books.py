@@ -2,7 +2,9 @@
 Query wrappers for Books entity.
 """
 
-from app.db.helpers import execute_sql_fetch_all, execute_sql_fetch_one
+from app.db.helpers import \
+    execute_sql_fetch_all, execute_sql_fetch_one, execute_sql
+from app.models import books as books_models
 
 
 def get_all_books_query(db, filters, offset, limit):
@@ -74,3 +76,41 @@ def get_book(db, book_id):
     params = {'book_id': book_id}
     book = execute_sql_fetch_one(db, sql, params)
     return book
+
+
+def add_new_book(db, book: books_models.BookCreate) -> int:
+    """
+    Add a new book record to the database and link it to the provided authors.
+    Returns the newly created book's ID.
+    """
+    # TODO :: Bind both of these operations in a single transaction
+
+    # Insert the book into the books table
+    book_sql = """
+    INSERT INTO books (title, isbn, genre, publication_date, available_copies)
+    VALUES (%(title)s, %(isbn)s, %(genre)s, %(publication_date)s, %(available_copies)s)
+    RETURNING id;
+    """
+    params = {
+        'title': book.title,
+        'isbn': book.isbn,
+        'genre': book.genre,
+        'publication_date': book.publication_date,
+        'available_copies': book.available_copies,
+    }
+    new_book_id_row = execute_sql(db, book_sql, params, returning=True)
+    new_book_id = new_book_id_row[0]
+
+    # Link the new book with the provided authors
+    link_sql = """
+    INSERT INTO book_authors (book_id, author_id)
+    VALUES (%(book_id)s, %(author_id)s);
+    """
+    for author_id in book.author_ids:
+        link_params = {
+            'book_id': new_book_id,
+            'author_id': author_id,
+        }
+        execute_sql(db, link_sql, link_params)
+
+    return new_book_id

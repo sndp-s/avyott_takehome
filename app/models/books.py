@@ -19,6 +19,13 @@ class BaseBook(BaseModel):
     available_copies: int = 0
 
 
+class BookCreate(BaseBook):
+    """
+    Model for 'Create new Book' entity request
+    """
+    author_ids: list[int]
+
+
 class Book(BaseBook):
     """
     Books entity model

@@ -3,6 +3,7 @@ Books services
 """
 
 from app.db.queries import books as books_queries
+from app.models import books as books_models
 
 
 def get_all_books_service(db, filters=None, offset=0, limit=10):
@@ -21,3 +22,11 @@ def get_book_service(db, book_id):
     # TODO :: Implement error handling
     book = books_queries.get_book(db, book_id)
     return book
+
+
+def add_new_book_service(db, book: books_models.BookCreate):
+    """
+    Add a new book to the library database
+    """
+    added_book = books_queries.add_new_book(db, book)
+    return added_book

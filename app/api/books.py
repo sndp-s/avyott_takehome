@@ -35,3 +35,15 @@ async def get_book(
     """
     book = books_service.get_book_service(db, book_id)
     return book
+
+
+@router.post("")
+async def create_book(
+    book: books_models.BookCreate,
+    db=Depends(get_db)
+) -> int:
+    """
+    Adds a new book to the library.
+    """
+    added_book = books_service.add_new_book_service(db, book)
+    return added_book
