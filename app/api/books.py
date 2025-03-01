@@ -51,7 +51,7 @@ async def create_book(
 
 @router.put("/{book_id}")
 async def update_book(
-    book_id: int,
+    book_id: Annotated[int, Path()],
     book: books_models.BookUpdate,
     db=Depends(get_db)
 ) -> int:
