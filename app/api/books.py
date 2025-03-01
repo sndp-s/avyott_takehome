@@ -3,7 +3,7 @@ Books APIs router
 """
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Path
 from app.db.connection import get_db
 from app.services import books as books_service
 from app.models import books as books_models
@@ -23,3 +23,15 @@ async def get_all_books(
     """
     all_books = books_service.get_all_books_service(db, {}, offset, limit)
     return all_books
+
+
+@router.get("/{book_id}")
+async def get_book(
+    book_id: Annotated[int, Path()],
+    db=Depends(get_db)
+) -> books_models.BookResponse:
+    """
+    Returns the books corresponding to the given book_id
+    """
+    book = books_service.get_book_service(db, book_id)
+    return book
