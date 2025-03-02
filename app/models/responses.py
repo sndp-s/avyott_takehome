@@ -23,4 +23,4 @@ class APIResponse(BaseModel, Generic[T]):
     success: bool = True
     message: str
     data: T | None = None
-    error: ErrorDetail
+    error: ErrorDetail | None = None
