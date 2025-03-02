@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi import Request, status
 from app.models.responses import APIResponse, ErrorDetail
 from app.core.constants import ErrorCode
+from app.core import exceptions as custom_exceptions
 
 async def global_exception_handler(request: Request, exc: Exception):
     """
@@ -47,5 +48,39 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=response_data.model_dump()
+    )
+
+
+async def duplicate_entry_exception_handler(request: Request, exc: custom_exceptions.DuplicateEntryException):
+    """
+    Handle DuplicateEntryException.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.INTEGRITY_ERROR)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response_data.model_dump()
+    )
+
+
+async def foreign_key_not_found_exception_handler(request: Request, exc: custom_exceptions.ForeignKeyNotFoundException):
+    """
+    Handle ForeignKeyNotFoundException.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.BAD_REQUEST)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
         content=response_data.model_dump()
     )

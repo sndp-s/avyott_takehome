@@ -28,9 +28,8 @@ def add_new_book_service(db, book: books_models.BookCreate):
     """
     Add a new book to the library database
     """
-    # TODO :: rename added_book to book_id
-    added_book = books_queries.add_new_book(db, book)
-    return added_book
+    book_id = books_queries.add_new_book(db, book)
+    return book_id
 
 
 def update_book_service(db, book_id: int, update_data: dict):

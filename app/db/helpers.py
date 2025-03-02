@@ -26,7 +26,7 @@ def execute_sql_fetch_one(db, sql, params=None):
     except psycopg2.Error as e:
         # TODO :: log error here
         db.rollback()
-        raise HTTPException(status_code=500, detail="Database error")
+        raise
 
 
 def execute_sql_fetch_all(db, sql, params=None):
@@ -38,7 +38,7 @@ def execute_sql_fetch_all(db, sql, params=None):
     except psycopg2.Error as e:
         # TODO :: log error here
         db.rollback()
-        raise HTTPException(status_code=500, detail="Database error")
+        raise
 
 
 def execute_sql_update(db, sql, params=None):
@@ -49,9 +49,9 @@ def execute_sql_update(db, sql, params=None):
             db.commit()
             return cursor.rowcount  # number of rows affected
     except psycopg2.Error as e:
-        # TODO :: log error here
+        # TODO :: add log here
         db.rollback()
-        raise HTTPException(status_code=500, detail="Database error")
+        raise
 
 
 def execute_sql(
@@ -95,5 +95,6 @@ def execute_sql(
             return result
 
     except psycopg2.Error as e:
+        # TODO :: add log here
         db.rollback()
-        raise HTTPException(status_code=500, detail="Database error")
+        raise
