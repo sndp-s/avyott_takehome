@@ -23,5 +23,7 @@ app.add_exception_handler(custom_exceptions.DuplicateEntryException,
                           exception_handlers.duplicate_entry_exception_handler)
 app.add_exception_handler(custom_exceptions.ForeignKeyNotFoundException,
                           exception_handlers.foreign_key_not_found_exception_handler)
+app.add_exception_handler(custom_exceptions.DatabaseOperationException,
+                          exception_handlers.database_operation_exception_handler)
 app.add_exception_handler(
     Exception, exception_handlers.global_exception_handler)

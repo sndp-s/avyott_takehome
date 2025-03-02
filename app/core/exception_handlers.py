@@ -84,3 +84,20 @@ async def foreign_key_not_found_exception_handler(request: Request, exc: custom_
         status_code=exc.status_code,
         content=response_data.model_dump()
     )
+
+
+async def database_operation_exception_handler(request: Request, exc: custom_exceptions.DatabaseOperationException):
+    """
+    Handle rest of the other Database exceptions.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.DATABASE_ERROR)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response_data.model_dump()
+    )
