@@ -14,6 +14,34 @@ from app.core.APIKeyAuthMiddleware import APIKeyAuthMiddleware
 
 app = FastAPI()
 
+# Customise openapi to requrie a x-api-header header field for all endpoints.
+app.original_openapi = app.openapi
+def custom_openapi():
+    """
+    Adds a required fields to input x-api-key header in every APIs. 
+    """
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    # Call the original openapi function to generate the schema
+    openapi_schema = app.original_openapi()
+    # Add a global header parameter to every operation
+    header_param = {
+        "in": "header",
+        "name": "x-api-key",
+        "description": "API Key required for authentication",
+        "required": True,
+        "schema": {"type": "string"}
+    }
+    for path in openapi_schema.get("paths", {}).values():
+        for operation in path.values():
+            parameters = operation.get("parameters", [])
+            parameters.append(header_param)
+            operation["parameters"] = parameters
+    app.openapi_schema = openapi_schema
+    return openapi_schema
+app.openapi = custom_openapi
+
 # Register middlewares
 app.add_middleware(APIKeyAuthMiddleware)
 
