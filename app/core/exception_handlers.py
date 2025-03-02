@@ -10,7 +10,7 @@ from app.core.constants import ErrorCode
 
 async def global_exception_handler(request: Request, exc: Exception):
     """
-    Handle all unexpected exceptions globally while retaining API documentation.
+    Handle all unexpected exceptions globally.
     """
     # NOTE :: log the exception here
 
