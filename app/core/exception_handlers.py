@@ -101,3 +101,20 @@ async def database_operation_exception_handler(request: Request, exc: custom_exc
         status_code=exc.status_code,
         content=response_data.model_dump()
     )
+
+
+async def loan_pending_exception_handler(request: Request, exc: custom_exceptions.LoanPendingException):
+    """
+    Handle exceptions raised when trying to delete resources associated with an open loan.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.BAD_REQUEST)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response_data.model_dump()
+    )

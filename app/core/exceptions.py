@@ -36,3 +36,10 @@ class DatabaseOperationException(CustomAPIException):
     def __init__(self, detail: str = ""):
         super().__init__(detail, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class LoanPendingException(CustomAPIException):
+    """
+    Raised when an entity with pending loans is attempted to be deleted.
+    """
+    def __init__(self, detail: str = "Operation cannot be completed; there are pending loans."):
+        super().__init__(detail, status.HTTP_400_BAD_REQUEST)

@@ -3,7 +3,7 @@ Query wrappers for Books entity.
 """
 
 from app.db.helpers import \
-    execute_sql_fetch_all, execute_sql_fetch_one, execute_sql
+    execute_sql_fetch_all, execute_sql_fetch_one
 from app.models import books as books_models
 from app.core import exceptions as custom_exceptions
 import psycopg2
@@ -138,6 +138,8 @@ def add_new_book(db, book: books_models.BookCreate) -> int:
         )
 
 
+# TODO :: Handle unhandled scenerios
+# NOTE :: Unhandled scenerio: book asked to be updated does not exist
 def update_book(db, book_id, update_data):
     """
     Update a book record and its associated authors.
@@ -195,14 +197,20 @@ def update_book(db, book_id, update_data):
 def delete_book(db, book_id: int) -> int:
     """
     Delete a book and its associations from the database.
-    Returns the number of rows affected by the deletion of the book.
     """
-    # Delete associations in the book_authors table
-    sql_delete_authors = "DELETE FROM book_authors WHERE book_id = %(book_id)s;"
-    execute_sql(db, sql_delete_authors, {"book_id": book_id}, returning=False)
+    try:
+        with db.cursor() as cursor:
+            # Delete associations in book_authors table
+            cursor.execute("DELETE FROM book_authors WHERE book_id = %(book_id)s", {"book_id": book_id})
 
-    # Delete the book from the books table
-    sql_delete_book = "DELETE FROM books WHERE id = %(book_id)s;"
-    rows_deleted = execute_sql(db, sql_delete_book, {"book_id": book_id}, returning=False)
+            # Delete the book from the books table
+            cursor.execute("DELETE FROM books WHERE id = %(book_id)s", {"book_id": book_id})
 
-    return rows_deleted
+        db.commit()
+        return True
+    except psycopg2.errors.ForeignKeyViolation as e:
+        db.rollback()
+        raise custom_exceptions.LoanPendingException("Cannot delete book as it is currently loaned.")
+    except psycopg2.Error as e:
+        db.rollback()
+        raise
