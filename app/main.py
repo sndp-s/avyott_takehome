@@ -10,8 +10,12 @@ from fastapi.exceptions import RequestValidationError
 from app.api.books import router as books_router
 from app.core import exceptions as custom_exceptions
 from app.core import exception_handlers
+from app.core.APIKeyAuthMiddleware import APIKeyAuthMiddleware
 
 app = FastAPI()
+
+# Register middlewares
+app.add_middleware(APIKeyAuthMiddleware)
 
 # Register routers
 app.include_router(books_router, prefix='/books', tags=['Books'])

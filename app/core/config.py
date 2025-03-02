@@ -20,4 +20,6 @@ class Settings(BaseSettings):
     minconn: int = 1
     maxconn: int = 10
 
+    api_key: str
+
 settings = Settings()

@@ -15,4 +15,4 @@ class ErrorCode(str, Enum):
     INTEGRITY_ERROR = "integrity_error"
     DATABASE_ERROR = "database_error"
     NOT_FOUND = "not_found"
-
+    UNAUTHORIZED = "unauthorized"
