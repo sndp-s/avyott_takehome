@@ -178,8 +178,6 @@ def add_new_book(db, book: books_models.BookCreate) -> int:
         )
 
 
-# TODO :: Handle unhandled scenerios
-# NOTE :: Unhandled scenerio: book asked to be updated does not exist
 def update_book(db, book_id, update_data):
     """
     Update a book record and its associated authors.
@@ -195,13 +193,19 @@ def update_book(db, book_id, update_data):
                     params[key] = value
             params["book_id"] = book_id
 
+            book_updated = False
             if set_clauses:
                 sql_update = f"""
                 UPDATE books
                 SET {', '.join(set_clauses)}
-                WHERE id = %(book_id)s;
+                WHERE id = %(book_id)s
+                RETURNING id;
                 """
                 cursor.execute(sql_update, params)
+                book_updated = cursor.fetchone()
+
+            if not book_updated:
+                raise custom_exceptions.RecordNotFoundException("The book with the given ID does not exist.")
 
             # If author_ids is provided, update the book_authors associations
             if "author_ids" in update_data:
