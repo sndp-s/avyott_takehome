@@ -7,7 +7,6 @@ from pydantic import BaseModel
 from pydantic_extra_types.isbn import ISBN
 
 
-# TODO :: Streamline the models
 class BaseBook(BaseModel):
     """
     Base model for the Books entity

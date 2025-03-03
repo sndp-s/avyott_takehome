@@ -121,6 +121,7 @@ def get_book(db, book_id):
             "Failed to fetch the book."
         )
 
+
 def add_new_book(db, book: books_models.BookCreate) -> int:
     """
     Add a new book record to the database and link it to the provided authors.

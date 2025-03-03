@@ -41,19 +41,6 @@ def execute_sql_fetch_all(db, sql, params=None):
         raise
 
 
-def execute_sql_update(db, sql, params=None):
-    """Execute an update (INSERT, DELETE, UPDATE) SQL statement and commit/rollback transaction"""
-    try:
-        with db.cursor() as cursor:
-            cursor.execute(sql, params)
-            db.commit()
-            return cursor.rowcount  # number of rows affected
-    except psycopg2.Error as e:
-        # TODO :: add log here
-        db.rollback()
-        raise
-
-
 def execute_sql(
     db,
     sql,
