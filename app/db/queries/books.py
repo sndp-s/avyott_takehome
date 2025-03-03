@@ -78,35 +78,42 @@ def get_book(db, book_id):
     """
     Fetch the book matching the given id
     """
-    sql = \
-    """
-    SELECT 
-        b.id, 
-        b.title, 
-        b.isbn, 
-        b.genre, 
-        b.publication_date,
-        b.available_copies,
-        COALESCE(
-            json_agg(
-                DISTINCT jsonb_build_object(
-                    'id', a.id, 
-                    'first_name', a.first_name, 
-                    'last_name', a.last_name
-                )
-            ) FILTER (WHERE a.id IS NOT NULL), 
-            '[]'::json
-        ) AS authors
-    FROM books b
-    LEFT JOIN book_authors ba ON b.id = ba.book_id
-    LEFT JOIN authors a ON ba.author_id = a.id
-    WHERE b.id = %(book_id)s
-    GROUP BY b.id;
-    """
-    params = {'book_id': book_id}
-    book = execute_sql_fetch_one(db, sql, params)
-    return book
-
+    try:
+        sql = \
+        """
+        SELECT 
+            b.id, 
+            b.title, 
+            b.isbn, 
+            b.genre, 
+            b.publication_date,
+            b.available_copies,
+            COALESCE(
+                json_agg(
+                    DISTINCT jsonb_build_object(
+                        'id', a.id, 
+                        'first_name', a.first_name, 
+                        'last_name', a.last_name
+                    )
+                ) FILTER (WHERE a.id IS NOT NULL), 
+                '[]'::json
+            ) AS authors
+        FROM books b
+        LEFT JOIN book_authors ba ON b.id = ba.book_id
+        LEFT JOIN authors a ON ba.author_id = a.id
+        WHERE b.id = %(book_id)s
+        GROUP BY b.id;
+        """
+        params = {'book_id': book_id}
+        book = execute_sql_fetch_one(db, sql, params)
+        if not book:
+            raise custom_exceptions.RecordNotFoundException("Books not found")
+        return book
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException(
+            "Failed to fetch the book."
+        )
 
 def add_new_book(db, book: books_models.BookCreate) -> int:
     """

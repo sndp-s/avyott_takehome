@@ -118,3 +118,20 @@ async def loan_pending_exception_handler(request: Request, exc: custom_exception
         status_code=exc.status_code,
         content=response_data.model_dump()
     )
+
+
+async def record_not_found_exception_handler(request: Request, exc: custom_exceptions.RecordNotFoundException):
+    """
+    Handle exceptions raised when resource isn't found in the database.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.NOT_FOUND)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response_data.model_dump()
+    )

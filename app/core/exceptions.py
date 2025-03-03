@@ -43,3 +43,11 @@ class LoanPendingException(CustomAPIException):
     """
     def __init__(self, detail: str = "Operation cannot be completed; there are pending loans."):
         super().__init__(detail, status.HTTP_400_BAD_REQUEST)
+
+
+class RecordNotFoundException(CustomAPIException):
+    """
+    Raised when requested record not found.
+    """
+    def __init__(self, detail: str = "Record not found"):
+        super().__init__(detail, status.HTTP_404_NOT_FOUND)
