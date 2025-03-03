@@ -239,6 +239,7 @@ def update_book(db, book_id, update_data):
         )
 
 
+# NOTE :: Fix the deletion logic
 def delete_book(db, book_id: int) -> int:
     """
     Delete a book and its associations from the database.
