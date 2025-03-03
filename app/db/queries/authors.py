@@ -97,3 +97,45 @@ def add_new_author_query(db, author: authors_model) -> authors_model.Author:
         raise custom_exceptions.DatabaseOperationException(
             "Failed to add author to the library."
         )
+
+
+def update_author_query(db, author_id, update_data):
+    """
+    Update an existing author in the database.
+    """
+    try:
+        with db.cursor() as cursor:
+            # Prepare the UPDATE statement
+            set_clauses = []
+            params = {"author_id": author_id}
+
+            for key, value in update_data.items():
+                set_clauses.append(f"{key} = %({key})s")
+                params[key] = value
+
+            author_updated = None
+            if set_clauses:
+                sql = f"""
+                UPDATE authors
+                SET {', '.join(set_clauses)}
+                WHERE id = %(author_id)s
+                RETURNING id, first_name, last_name, date_of_birth;
+                """
+                cursor.execute(sql, params)
+                author_updated = cursor.fetchone()
+
+            if not author_updated:
+                raise custom_exceptions.RecordNotFoundException("The author with the given ID does not exist.")
+
+        db.commit()
+        return authors_model.Author(
+            id=author_updated[0],
+            first_name=author_updated[1],
+            last_name=author_updated[2],
+            date_of_birth = author_updated[3]
+        )
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException(
+            "Failed to update the author."
+        )

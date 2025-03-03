@@ -57,3 +57,20 @@ async def create_author(
         data=added_author,
         message="Author added successfully"
     )
+
+
+@router.put("/{author_id}")
+async def update_author(
+    author_id: Annotated[int, Path()],
+    author: authors_models.AuthorUpdate,
+    db=Depends(get_db)
+) -> APIResponse[authors_models.Author]:
+    """
+    Update an existing Author.
+    """
+    updated_author = authors_service.update_author_service(db, author_id, author.model_dump(exclude_unset=True))
+
+    return APIResponse(
+        data=updated_author,
+        message="Author updated successfully."
+    )

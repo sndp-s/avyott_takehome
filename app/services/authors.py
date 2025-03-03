@@ -29,3 +29,11 @@ def add_new_author_service(db, book: authors_models.AuthorCreate) -> authors_mod
     """
     author_id = authors_queries.add_new_author_query(db, book)
     return author_id
+
+
+def update_author_service(db, author_id: int, update_data: dict) -> authors_models.Author:
+    """
+    Update an author record.
+    """
+    updated_author = authors_queries.update_author_query(db, author_id, update_data)
+    return updated_author
