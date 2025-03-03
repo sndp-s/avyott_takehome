@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from pydantic_extra_types.isbn import ISBN
 
 
-# Request
+# TODO :: Streamline the models
 class BaseBook(BaseModel):
     """
     Base model for the Books entity
@@ -26,11 +26,21 @@ class BookCreate(BaseBook):
     author_ids: list[int]
 
 
+class BookAuthor(BaseModel):
+    """
+    Model of Author entity as found in the Books response
+    """
+    id: int
+    first_name: str
+    last_name: str
+
+
 class Book(BaseBook):
     """
     Books entity model
     """
     id: int
+    authors: list[BookAuthor]
 
 
 class BookUpdate(BaseModel):
@@ -43,21 +53,3 @@ class BookUpdate(BaseModel):
     publication_date: date | None = None
     available_copies: int | None = None
     author_ids: list[int] | None = None
-
-
-# Response
-class BookAuthor(BaseModel):
-    """
-    Model of Author entity as found in the Books response
-    """
-    id: int
-    first_name: str
-    last_name: str
-
-
-# TODO :: refactor it to BookWithAuthors
-class BookResponse(Book):
-    """
-    Book response model
-    """
-    authors: list[BookAuthor]
