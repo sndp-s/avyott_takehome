@@ -14,64 +14,70 @@ def get_all_books_query(db, filters, offset, limit):
     """
     Obtain all books with optional filtering.
     """
-    # Prepare the WHERE clause for filtering.
-    where_clauses = []
-    filter_params = {}
-    if filters.title:
-        where_clauses.append("b.title ILIKE %(title)s")
-        filter_params["title"] = f"%{filters.title}%"
-    if filters.genre:
-        where_clauses.append("b.genre ILIKE %(genre)s")
-        filter_params["genre"] = f"%{filters.genre}%"
-    if filters.isbn:
-        where_clauses.append("b.isbn ILIKE %(isbn)s")
-        filter_params["isbn"] = f"%{filters.isbn}%"
-    if filters.author:
-        where_clauses.append("""
-            EXISTS (
-                SELECT 1 FROM authors a2 
-                JOIN book_authors ba2 ON b.id = ba2.book_id 
-                WHERE a2.id = ba2.author_id 
-                  AND (a2.first_name ILIKE %(author)s OR a2.last_name ILIKE %(author)s)
-            )
-        """)
-        filter_params["author"] = f"%{filters.author}%"
+    try:
+        # Prepare the WHERE clause for filtering.
+        where_clauses = []
+        filter_params = {}
+        if filters.title:
+            where_clauses.append("b.title ILIKE %(title)s")
+            filter_params["title"] = f"%{filters.title}%"
+        if filters.genre:
+            where_clauses.append("b.genre ILIKE %(genre)s")
+            filter_params["genre"] = f"%{filters.genre}%"
+        if filters.isbn:
+            where_clauses.append("b.isbn ILIKE %(isbn)s")
+            filter_params["isbn"] = f"%{filters.isbn}%"
+        if filters.author:
+            where_clauses.append("""
+                EXISTS (
+                    SELECT 1 FROM authors a2 
+                    JOIN book_authors ba2 ON b.id = ba2.book_id 
+                    WHERE a2.id = ba2.author_id 
+                    AND (a2.first_name ILIKE %(author)s OR a2.last_name ILIKE %(author)s)
+                )
+            """)
+            filter_params["author"] = f"%{filters.author}%"
 
-    where_clause = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+        where_clause = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
-    params = {"limit": limit, "offset": offset}
-    params.update(filter_params)
+        params = {"limit": limit, "offset": offset}
+        params.update(filter_params)
 
-    # Prepare the main query.
-    sql = f"""
-        SELECT * FROM (
-            SELECT 
-                b.id, 
-                b.title, 
-                b.isbn, 
-                b.genre, 
-                b.publication_date, 
-                COALESCE(
-                    json_agg(
-                        DISTINCT jsonb_build_object(
-                            'id', a.id, 
-                            'first_name', a.first_name, 
-                            'last_name', a.last_name
-                        )
-                    ) FILTER (WHERE a.id IS NOT NULL), 
-                    '[]'::json
-                ) AS authors
-            FROM books b
-            LEFT JOIN book_authors ba ON b.id = ba.book_id
-            LEFT JOIN authors a ON ba.author_id = a.id
-            {where_clause}
-            GROUP BY b.id
-            ORDER BY b.title
-        ) AS sub
-        LIMIT %(limit)s OFFSET %(offset)s;
-    """
-    all_books = execute_sql_fetch_all(db, sql, params)
-    return all_books
+        # Prepare the main query.
+        sql = f"""
+            SELECT * FROM (
+                SELECT 
+                    b.id, 
+                    b.title, 
+                    b.isbn, 
+                    b.genre, 
+                    b.publication_date, 
+                    COALESCE(
+                        json_agg(
+                            DISTINCT jsonb_build_object(
+                                'id', a.id, 
+                                'first_name', a.first_name, 
+                                'last_name', a.last_name
+                            )
+                        ) FILTER (WHERE a.id IS NOT NULL), 
+                        '[]'::json
+                    ) AS authors
+                FROM books b
+                LEFT JOIN book_authors ba ON b.id = ba.book_id
+                LEFT JOIN authors a ON ba.author_id = a.id
+                {where_clause}
+                GROUP BY b.id
+                ORDER BY b.title
+            ) AS sub
+            LIMIT %(limit)s OFFSET %(offset)s;
+        """
+        all_books = execute_sql_fetch_all(db, sql, params)
+        return all_books
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException(
+            "Failed to fetch books."
+        )
 
 
 def get_book(db, book_id):
