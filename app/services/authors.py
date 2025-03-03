@@ -27,8 +27,8 @@ def add_new_author_service(db, book: authors_models.AuthorCreate) -> authors_mod
     """
     Add a new Author to the library database
     """
-    author_id = authors_queries.add_new_author_query(db, book)
-    return author_id
+    author = authors_queries.add_new_author_query(db, book)
+    return author
 
 
 def update_author_service(db, author_id: int, update_data: dict) -> authors_models.Author:
@@ -44,4 +44,3 @@ def delete_author_service(db, author_id: int):
     Delete author.
     """
     # NOTE :: Under construction
-

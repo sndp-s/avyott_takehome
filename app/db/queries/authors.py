@@ -7,7 +7,7 @@ import psycopg2
 from app.db.helpers import \
     execute_sql_fetch_all, execute_sql_fetch_one
 from app.core import exceptions as custom_exceptions
-from app.models import authors as authors_model
+from app.models import authors as authors_models
 
 def get_all_authors_query(db, offset, limit):
     """
@@ -63,7 +63,7 @@ def get_author(db, author_id):
         )
 
 
-def add_new_author_query(db, author: authors_model) -> authors_model.Author:
+def add_new_author_query(db, author) -> authors_models.Author:
     """
     Add a new author record to the database.
     """
@@ -85,7 +85,7 @@ def add_new_author_query(db, author: authors_model) -> authors_model.Author:
             author_id, first_name, last_name, date_of_birth = cursor.fetchone()
             db.commit()
 
-            return authors_model.Author(
+            return authors_models.Author(
                 id=author_id,
                 first_name=first_name,
                 last_name=last_name,
@@ -128,7 +128,7 @@ def update_author_query(db, author_id, update_data):
                 raise custom_exceptions.RecordNotFoundException("The author with the given ID does not exist.")
 
         db.commit()
-        return authors_model.Author(
+        return authors_models.Author(
             id=author_updated[0],
             first_name=author_updated[1],
             last_name=author_updated[2],
