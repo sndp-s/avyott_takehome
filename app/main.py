@@ -8,6 +8,7 @@ Author Email: sandeeptech8@gmail.com
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from app.api.books import router as books_router
+from app.api.authors import router as authors_router
 from app.core import exceptions as custom_exceptions
 from app.core import exception_handlers
 from app.core.APIKeyAuthMiddleware import APIKeyAuthMiddleware
@@ -47,6 +48,7 @@ app.add_middleware(APIKeyAuthMiddleware)
 
 # Register routers
 app.include_router(books_router, prefix='/books', tags=['Books'])
+app.include_router(authors_router, prefix='/authors', tags=['Authors'])
 
 # Register exception handlers
 app.add_exception_handler(RequestValidationError,
