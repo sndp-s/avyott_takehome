@@ -74,3 +74,16 @@ async def update_author(
         data=updated_author,
         message="Author updated successfully."
     )
+
+
+# NOTE :: Under construction
+# @router.delete("/{author_id}")
+async def delete_author(
+    author_id: Annotated[int, Path()],
+    db=Depends(get_db)
+) -> APIResponse:
+    """
+    Deletes the Author corresponsing to given ID.
+    """
+    authors_service.delete_author_service(db, author_id)
+    return APIResponse(message="Author deleted.")

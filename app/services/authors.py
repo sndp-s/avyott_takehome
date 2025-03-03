@@ -37,3 +37,11 @@ def update_author_service(db, author_id: int, update_data: dict) -> authors_mode
     """
     updated_author = authors_queries.update_author_query(db, author_id, update_data)
     return updated_author
+
+
+def delete_author_service(db, author_id: int):
+    """
+    Delete author.
+    """
+    # NOTE :: Under construction
+
