@@ -23,6 +23,5 @@ async def get_all_patrons(
     all_patrons = patrons_service.get_all_patrons_service(db, offset, limit)
     return APIResponse(
         data=all_patrons,
-        message="Authors fetched successfully"
+        message="patrons fetched successfully"
     )
-
