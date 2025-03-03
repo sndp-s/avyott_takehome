@@ -20,3 +20,9 @@ class Author(BaseAuthor):
     """
     id: int
 
+
+class AuthorCreate(BaseAuthor):
+    """
+    Model for 'create author' API request body.
+    """
+    date_of_birth: date | None = None

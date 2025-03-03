@@ -42,3 +42,18 @@ async def get_author(
         data=author,
         message='Author fetched successfully'
     )
+
+
+@router.post("")
+async def create_author(
+    author: authors_models.AuthorCreate,
+    db=Depends(get_db)
+) -> APIResponse[authors_models.Author]:
+    """
+    Adds a new Author to the library.
+    """
+    added_author = authors_service.add_new_author_service(db, author)
+    return APIResponse(
+        data=added_author,
+        message="Author added successfully"
+    )

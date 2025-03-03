@@ -7,7 +7,7 @@ import psycopg2
 from app.db.helpers import \
     execute_sql_fetch_all, execute_sql_fetch_one
 from app.core import exceptions as custom_exceptions
-
+from app.models import authors as authors_model
 
 def get_all_authors_query(db, offset, limit):
     """
@@ -60,4 +60,40 @@ def get_author(db, author_id):
         db.rollback()
         raise custom_exceptions.DatabaseOperationException(
             "Failed to fetch the Author."
+        )
+
+
+def add_new_author_query(db, author: authors_model) -> authors_model.Author:
+    """
+    Add a new author record to the database.
+    """
+    try:
+        params = {
+            'first_name': author.first_name,
+            'last_name': author.last_name,
+            'date_of_birth': author.date_of_birth
+        }
+
+        sql = """
+        INSERT INTO authors (first_name, last_name, date_of_birth)
+        VALUES (%(first_name)s, %(last_name)s, %(date_of_birth)s)
+        RETURNING id, first_name, last_name, date_of_birth;
+        """
+
+        with db.cursor() as cursor:
+            cursor.execute(sql, params)
+            author_id, first_name, last_name, date_of_birth = cursor.fetchone()
+            db.commit()
+
+            return authors_model.Author(
+                id=author_id,
+                first_name=first_name,
+                last_name=last_name,
+                date_of_birth=date_of_birth
+            )
+
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException(
+            "Failed to add author to the library."
         )
