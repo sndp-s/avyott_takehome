@@ -40,3 +40,18 @@ async def get_patron(
         data=patron,
         message='patrons fetched successfully'
     )
+
+
+@router.post("")
+async def create_patron(
+    patron: patrons_models.PatronCreate,
+    db=Depends(get_db)
+) -> APIResponse[patrons_models.Patron]:
+    """
+    Adds a new Patron to the library.
+    """
+    added_patron = patrons_service.add_new_patron_service(db, patron)
+    return APIResponse(
+        data=added_patron,
+        message="Patron added successfully"
+    )

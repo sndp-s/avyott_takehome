@@ -20,3 +20,10 @@ class Patron(BaseModel):
     """
     id: int
     registration_date: date
+
+
+class PatronCreate(PatronBase):
+    """
+    Model for 'Create patron' API request body.
+    """
+    pass
