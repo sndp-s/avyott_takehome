@@ -63,6 +63,10 @@ app.add_exception_handler(custom_exceptions.LoanPendingException,
                           exception_handlers.loan_pending_exception_handler)
 app.add_exception_handler(custom_exceptions.RecordNotFoundException,
                           exception_handlers.record_not_found_exception_handler)
+app.add_exception_handler(custom_exceptions.BusinessValidationException,
+                          exception_handlers.business_validation_exception_handler)
+app.add_exception_handler(custom_exceptions.UnavailableResourceException,
+                          exception_handlers.unavailable_resource_exception_handler)
 app.add_exception_handler(custom_exceptions.DatabaseOperationException,
                           exception_handlers.database_operation_exception_handler)
 app.add_exception_handler(

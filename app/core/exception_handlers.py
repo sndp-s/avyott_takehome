@@ -135,3 +135,37 @@ async def record_not_found_exception_handler(request: Request, exc: custom_excep
         status_code=exc.status_code,
         content=response_data.model_dump()
     )
+
+
+async def unavailable_resource_exception_handler(request: Request, exc: custom_exceptions.UnavailableResourceException):
+    """
+    Handle cases where a requested resource is unavailable.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.BAD_REQUEST)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response_data.model_dump()
+    )
+
+
+async def business_validation_exception_handler(request: Request, exc: custom_exceptions.BusinessValidationException):
+    """
+    Handle business logic validation errors.
+    """
+    response_data = APIResponse[None](
+        success=False,
+        message=exc.detail,
+        data=None,
+        error=ErrorDetail(code=ErrorCode.VALIDATION_ERROR)
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response_data.model_dump()
+    )

@@ -51,3 +51,19 @@ class RecordNotFoundException(CustomAPIException):
     """
     def __init__(self, detail: str = "Record not found"):
         super().__init__(detail, status.HTTP_404_NOT_FOUND)
+
+
+class UnavailableResourceException(CustomAPIException):
+    """
+    Raised when a requested resource is unavailable.
+    """
+    def __init__(self, detail: str = "The requested resource is unavailable."):
+        super().__init__(detail, status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessValidationException(CustomAPIException):
+    """
+    Raised when a business logic validation fails.
+    """
+    def __init__(self, detail: str = "Business validation failed."):
+        super().__init__(detail, status.HTTP_422_UNPROCESSABLE_ENTITY)

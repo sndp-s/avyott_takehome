@@ -72,3 +72,17 @@ async def update_patron(
         data=updated_patron,
         message="Patron updated successfully."
     )
+
+
+@router.post("/{patron_id}/borrow")
+async def borrow_book(
+    patron_id: Annotated[int, Path()],
+    book_id: int,
+    db=Depends(get_db)
+) -> APIResponse[int]:
+    loan_id = patrons_service.borrow_book_service(db, patron_id, book_id)
+
+    return APIResponse(
+        message="Happy reading!",
+        data=loan_id
+    )

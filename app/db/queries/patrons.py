@@ -159,3 +159,57 @@ def update_patron_query(db, patron_id, update_data):
         raise custom_exceptions.DatabaseOperationException(
             "Failed to update the patron."
         )
+
+
+def borrow_book_query(db, patron_id, book_id):
+    """
+    Lend the book to the patron.
+    """
+    try:
+        with db.cursor() as cursor:
+            # Check if the book exists and has available copies
+            sql_check_book = """
+            SELECT available_copies FROM books WHERE id = %(book_id)s FOR UPDATE;
+            """
+            cursor.execute(sql_check_book, {"book_id": book_id})
+            book = cursor.fetchone()
+
+            if not book:
+                raise custom_exceptions.RecordNotFoundException("Book does not exist.")
+
+            available_copies = book[0]
+            if available_copies <= 0:
+                raise custom_exceptions.UnavailableResourceException("No available copies left for this book.")
+
+            # Check if the patron already has a pending loan for this book
+            sql_check_existing_loan = """
+            SELECT id FROM loans WHERE patron_id = %(patron_id)s AND book_id = %(book_id)s AND return_date IS NULL;
+            """
+            cursor.execute(sql_check_existing_loan, {"patron_id": patron_id, "book_id": book_id})
+            existing_loan = cursor.fetchone()
+
+            if existing_loan:
+                raise custom_exceptions.BusinessValidationException("User already has this book on loan.")
+
+            # Reduce available copies (relying on DB constraints to prevent negative values)
+            sql_update_copies = """
+            UPDATE books SET available_copies = available_copies - 1 WHERE id = %(book_id)s;
+            """
+            cursor.execute(sql_update_copies, {"book_id": book_id})
+
+            # Insert new loan record
+            sql_create_loan = """
+            INSERT INTO loans (patron_id, book_id, loan_date, due_date)
+            VALUES (%(patron_id)s, %(book_id)s, CURRENT_DATE, CURRENT_DATE + INTERVAL '14 days')
+            RETURNING id;
+            """
+            cursor.execute(sql_create_loan, {"patron_id": patron_id, "book_id": book_id})
+            loan_id = cursor.fetchone()[0]
+
+        # Commit transaction only if all operations succeed
+        db.commit()
+        return loan_id
+
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException("Failed to lend book")

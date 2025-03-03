@@ -36,3 +36,11 @@ def update_patron_service(db, patron_id: int, update_data: dict) -> patrons_mode
     """
     updated_patron = patrons_queries.update_patron_query(db, patron_id, update_data)
     return updated_patron
+
+
+def borrow_book_service(db, patron_id, book_id):
+    """
+    Lends the book to the patron.
+    """
+    loan_id = patrons_queries.borrow_book_query(db, patron_id, book_id)
+    return loan_id
