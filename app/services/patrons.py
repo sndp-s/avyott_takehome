@@ -28,3 +28,11 @@ def add_new_patron_service(db, patron: patrons_models.PatronCreate) -> patrons_m
     """
     patron = patrons_queries.add_new_patron_query(db, patron)
     return patron
+
+
+def update_patron_service(db, patron_id: int, update_data: dict) -> patrons_models.Patron:
+    """
+    Update a patron record.
+    """
+    updated_patron = patrons_queries.update_patron_query(db, patron_id, update_data)
+    return updated_patron

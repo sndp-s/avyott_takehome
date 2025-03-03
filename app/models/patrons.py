@@ -27,3 +27,12 @@ class PatronCreate(PatronBase):
     Model for 'Create patron' API request body.
     """
     pass
+
+
+class PatronUpdate(PatronBase):
+    """
+    Model for 'Update patron' API request body.
+    """
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None

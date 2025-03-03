@@ -110,3 +110,52 @@ def add_new_patron_query(db, patron) -> patrons_models.Patron:
         raise custom_exceptions.DatabaseOperationException(
             "Failed to register patron to the library."
         )
+
+
+def update_patron_query(db, patron_id, update_data):
+    """
+    Update an existing patron in the database.
+    """
+    try:
+        with db.cursor() as cursor:
+            # Prepare the UPDATE statement
+            set_clauses = []
+            params = {"patron_id": patron_id}
+
+            for key, value in update_data.items():
+                set_clauses.append(f"{key} = %({key})s")
+                params[key] = value
+
+            patron_updated = None
+            if set_clauses:
+                sql = f"""
+                UPDATE patrons
+                SET {', '.join(set_clauses)}
+                WHERE id = %(patron_id)s
+                RETURNING id, first_name, last_name, email, registration_date;
+                """
+                cursor.execute(sql, params)
+                patron_updated = cursor.fetchone()
+
+            if not patron_updated:
+                raise custom_exceptions.RecordNotFoundException("The patron with the given ID does not exist.")
+
+        db.commit()
+        return patrons_models.Patron(
+            id=patron_updated[0],
+            first_name=patron_updated[1],
+            last_name=patron_updated[2],
+            email=patron_updated[3],
+            registration_date=patron_updated[4]
+        )
+
+    except psycopg2.errors.UniqueViolation as e:
+        db.rollback()
+        raise custom_exceptions.DuplicateEntryException(
+            "A patron with the given email already exists."
+        )
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException(
+            "Failed to update the patron."
+        )

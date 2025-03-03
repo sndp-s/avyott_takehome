@@ -55,3 +55,20 @@ async def create_patron(
         data=added_patron,
         message="Patron added successfully"
     )
+
+
+@router.put("/{patron_id}")
+async def update_patron(
+    patron_id: Annotated[int, Path()],
+    patron: patrons_models.PatronUpdate,
+    db=Depends(get_db)
+) -> APIResponse[patrons_models.Patron]:
+    """
+    Update an existing Patron.
+    """
+    updated_patron = patrons_service.update_patron_service(db, patron_id, patron.model_dump(exclude_unset=True))
+
+    return APIResponse(
+        data=updated_patron,
+        message="Patron updated successfully."
+    )
