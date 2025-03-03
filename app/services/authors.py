@@ -11,3 +11,11 @@ def get_all_authors_service(db, offset=0, limit=10):
     """
     all_authors = authors_queries.get_all_authors_query(db, offset, limit)
     return all_authors
+
+
+def get_author_service(db, author_id):
+    """
+    Returns the authors matching the given author_id
+    """
+    author = authors_queries.get_author(db, author_id)
+    return author

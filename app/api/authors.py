@@ -3,7 +3,7 @@ Authors endpoints.
 """
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Path
 from app.db.connection import get_db
 from app.services import authors as authors_service
 from app.models import authors as authors_models
@@ -11,6 +11,8 @@ from app.models.responses import APIResponse
 
 router = APIRouter()
 
+
+# NOTE :: GOOD TO HAVE: Accept a parameter to return all the books associated with each author.
 @router.get("")
 async def get_all_authors(
     db=Depends(get_db),
@@ -23,4 +25,20 @@ async def get_all_authors(
     return APIResponse(
         data=all_authors,
         message="Authors fetched successfully"
+    )
+
+
+# NOTE :: GOOD TO HAVE: Accept a parameter to return all the books associated with the author.
+@router.get("/{author_id}")
+async def get_author(
+    author_id: Annotated[int, Path()],
+    db=Depends(get_db)
+) -> APIResponse[authors_models.Author]:
+    """
+    Returns the Author corresponding to the given author_id.
+    """
+    author = authors_service.get_author_service(db, author_id)
+    return APIResponse(
+        data=author,
+        message='Author fetched successfully'
     )
