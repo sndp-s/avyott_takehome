@@ -2,21 +2,48 @@
 Query wrappers for Books entity.
 """
 
+import psycopg2
+from psycopg2.extras import execute_values
 from app.db.helpers import \
     execute_sql_fetch_all, execute_sql_fetch_one
 from app.models import books as books_models
 from app.core import exceptions as custom_exceptions
-import psycopg2
-from psycopg2.extras import execute_values
 
 
 def get_all_books_query(db, filters, offset, limit):
     """
-    Obtain all books
+    Obtain all books with optional filtering.
     """
-    # TODO :: Add filtering
-    sql = \
-        """
+    # Prepare the WHERE clause for filtering.
+    where_clauses = []
+    filter_params = {}
+    if filters.title:
+        where_clauses.append("b.title ILIKE %(title)s")
+        filter_params["title"] = f"%{filters.title}%"
+    if filters.genre:
+        where_clauses.append("b.genre ILIKE %(genre)s")
+        filter_params["genre"] = f"%{filters.genre}%"
+    if filters.isbn:
+        where_clauses.append("b.isbn ILIKE %(isbn)s")
+        filter_params["isbn"] = f"%{filters.isbn}%"
+    if filters.author:
+        where_clauses.append("""
+            EXISTS (
+                SELECT 1 FROM authors a2 
+                JOIN book_authors ba2 ON b.id = ba2.book_id 
+                WHERE a2.id = ba2.author_id 
+                  AND (a2.first_name ILIKE %(author)s OR a2.last_name ILIKE %(author)s)
+            )
+        """)
+        filter_params["author"] = f"%{filters.author}%"
+
+    where_clause = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+
+    params = {"limit": limit, "offset": offset}
+    params.update(filter_params)
+
+    # Prepare the main query.
+    sql = f"""
         SELECT * FROM (
             SELECT 
                 b.id, 
@@ -37,12 +64,12 @@ def get_all_books_query(db, filters, offset, limit):
             FROM books b
             LEFT JOIN book_authors ba ON b.id = ba.book_id
             LEFT JOIN authors a ON ba.author_id = a.id
+            {where_clause}
             GROUP BY b.id
             ORDER BY b.title
         ) AS sub
         LIMIT %(limit)s OFFSET %(offset)s;
-        """
-    params = {'limit': limit, 'offset': offset}
+    """
     all_books = execute_sql_fetch_all(db, sql, params)
     return all_books
 

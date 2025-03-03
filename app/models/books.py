@@ -53,3 +53,13 @@ class BookUpdate(BaseModel):
     publication_date: date | None = None
     available_copies: int | None = None
     author_ids: list[int] | None = None
+
+
+class BookFilters(BaseModel):
+    """
+    Filters for the 'get all books' API
+    """
+    title: str | None = None
+    author: str | None = None
+    isbn: ISBN | None = None
+    genre: str | None = None

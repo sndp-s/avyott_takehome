@@ -1,4 +1,4 @@
-> **Note:** This assignment is incomplete. Only the Books API is implemented with search/filter features pending.
+> **Note:** This assignment is incomplete. Only the Books CRUD APIs are implemented (except API pending).
 
 # Library API
 Take-home assignment for [Avyott](https://www.avyott.com/a), detailed [here](https://docs.google.com/document/d/1j63SoZPrucUFlJExgtPX7SfLqkLZvUTUDG_d-WvHYG8/edit?usp=gmail).

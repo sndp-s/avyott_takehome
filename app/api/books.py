@@ -13,15 +13,15 @@ router = APIRouter()
 
 @router.get("")
 async def get_all_books(
-    # TODO :: Accept a filters parameter,
+    db=Depends(get_db),
+    filters: books_models.BookFilters = Depends(),
     offset: Annotated[int, Query(ge=0, description="Starting index")]=0,
-    limit: Annotated[int, Query(ge=1, le=100, description="Number of items to retrieve")]=10,
-    db=Depends(get_db)
+    limit: Annotated[int, Query(ge=1, le=100, description="Number of items to retrieve")]=10
 ) -> APIResponse[list[books_models.Book]]:
     """
     Returns all the books in the library with their basic info.
     """
-    all_books = books_service.get_all_books_service(db, {}, offset, limit)
+    all_books = books_service.get_all_books_service(db, filters, offset, limit)
     return APIResponse(
         data=all_books,
         message="Books fetched successfully"
