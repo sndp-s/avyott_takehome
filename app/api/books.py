@@ -84,6 +84,3 @@ async def delete_book(
     """
     books_service.delete_book_service(db, book_id)
     return APIResponse(message="Book deleted")
-
-
-# TODO :: Implement books search API
