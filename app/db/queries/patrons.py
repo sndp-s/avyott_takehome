@@ -213,3 +213,49 @@ def borrow_book_query(db, patron_id, book_id):
     except psycopg2.Error as e:
         db.rollback()
         raise custom_exceptions.DatabaseOperationException("Failed to lend book")
+
+
+def return_book(db, patron_id, book_id):
+    """
+    Process the return of a borrowed book.
+    """
+    try:
+        with db.cursor() as cursor:
+            # Ensure that the book was actually loaned by the user and is not already returned
+            sql_check_loan = """
+            SELECT id FROM loans 
+            WHERE patron_id = %(patron_id)s 
+              AND book_id = %(book_id)s 
+              AND return_date IS NULL 
+            FOR UPDATE;
+            """
+            cursor.execute(sql_check_loan, {"patron_id": patron_id, "book_id": book_id})
+            loan = cursor.fetchone()
+
+            if not loan:
+                raise custom_exceptions.RecordNotFoundException("No active loan found for this book.")
+
+            loan_id = loan[0]
+
+            # Mark the return field in the loan table
+            sql_mark_return = """
+            UPDATE loans 
+            SET return_date = CURRENT_DATE 
+            WHERE id = %(loan_id)s;
+            """
+            cursor.execute(sql_mark_return, {"loan_id": loan_id})
+
+            # Bump up the available copies count for the said book
+            sql_update_copies = """
+            UPDATE books 
+            SET available_copies = available_copies + 1 
+            WHERE id = %(book_id)s;
+            """
+            cursor.execute(sql_update_copies, {"book_id": book_id})
+
+        # Commit transaction only if all operations succeed
+        db.commit()
+
+    except psycopg2.Error as e:
+        db.rollback()
+        raise custom_exceptions.DatabaseOperationException("Failed to return book")

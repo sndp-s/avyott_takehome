@@ -86,3 +86,16 @@ async def borrow_book(
         message="Happy reading!",
         data=loan_id
     )
+
+
+@router.post("/{patron_id}/return")
+async def return_book(
+    patron_id: Annotated[int, Path()],
+    book_id: int,
+    db=Depends(get_db)
+) -> APIResponse[None]:
+    """
+    Process a book return.
+    """
+    patrons_service.return_book_service(db, patron_id, book_id)
+    return APIResponse(message="Return accepted!")

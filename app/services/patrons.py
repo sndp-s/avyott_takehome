@@ -44,3 +44,10 @@ def borrow_book_service(db, patron_id, book_id):
     """
     loan_id = patrons_queries.borrow_book_query(db, patron_id, book_id)
     return loan_id
+
+
+def return_book_service(db, patron_id, book_id):
+    """
+    Process the book return.
+    """
+    patrons_queries.return_book(db, patron_id, book_id)

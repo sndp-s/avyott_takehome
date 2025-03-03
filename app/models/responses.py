@@ -12,7 +12,7 @@ class ErrorDetail(BaseModel):
     """
     ErrorDetail model
     """
-    code: ErrorCode
+    code: ErrorCode | None = None
     details: dict[str, Any] | None = None
 
 
